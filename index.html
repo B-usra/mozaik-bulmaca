@@ -2,9 +2,9 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Özgün Kelime Mozaik Bulmaca</title>
-  <!-- Konfeti Efekti için Kütüphane -->
+  <!-- Konfeti Efekti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     :root {
@@ -18,7 +18,7 @@
       --text-color: #2c3e50;
     }
 
-    /* Tema Tanımlamaları */
+    /* Temalar */
     body.theme-dark {
       --bg-color: #1e1e2e;
       --card-bg: #2b2b3d;
@@ -29,7 +29,6 @@
       --cell-bg: #45475a;
       --text-color: #cdd6f4;
     }
-
     body.theme-green {
       --bg-color: #e8f5e9;
       --card-bg: #ffffff;
@@ -40,7 +39,6 @@
       --cell-bg: #ffffff;
       --text-color: #1b5e20;
     }
-
     body.theme-pink {
       --bg-color: #fce4ec;
       --card-bg: #ffffff;
@@ -52,71 +50,84 @@
       --text-color: #880e4f;
     }
 
-    * { box-sizing: border-box; }
+    * { 
+      box-sizing: border-box; 
+      touch-action: manipulation;
+    }
     body { 
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
       background: var(--bg-color); 
       display: flex; 
       flex-direction: column; 
       align-items: center; 
-      padding: 20px; 
+      padding: 10px; 
       margin: 0; 
       transition: background 0.3s;
+      overflow-x: hidden;
     }
-    h1 { color: var(--text-color); margin-bottom: 5px; }
-    p { color: var(--text-color); margin-bottom: 15px; text-align: center; opacity: 0.8; }
+    h1 { color: var(--text-color); margin: 5px 0; font-size: 20px; }
+    p { color: var(--text-color); margin: 0 0 10px 0; text-align: center; opacity: 0.8; font-size: 13px; }
     
-    /* Kontrol Paneli (Sayaç, İpucu, Renkler) */
     .control-panel {
       display: flex;
-      gap: 15px;
+      gap: 8px;
       align-items: center;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       flex-wrap: wrap;
     }
 
     .timer-box {
       background: var(--card-bg);
-      padding: 8px 16px;
+      padding: 6px 12px;
       border-radius: 8px;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 14px;
       color: var(--text-color);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
     .btn {
       background: var(--primary-color);
       color: #fff;
       border: none;
-      padding: 10px 18px;
+      padding: 6px 12px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
-      font-size: 14px;
-      transition: opacity 0.2s, transform 0.1s;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      font-size: 13px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
 
     .theme-select {
-      padding: 9px 12px;
+      padding: 6px 8px;
       border-radius: 8px;
       border: 1px solid var(--slot-border);
       background: var(--card-bg);
       color: var(--text-color);
       font-weight: bold;
-      cursor: pointer;
+      font-size: 13px;
     }
 
     .game-container { 
       display: flex; 
-      gap: 30px; 
-      flex-wrap: wrap; 
-      justify-content: center; 
-      align-items: flex-start;
+      gap: 15px; 
+      flex-direction: column; 
+      align-items: center;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    /* Masaüstü Ekran Düzeni */
+    @media (min-width: 768px) {
+      .game-container {
+        flex-direction: row;
+        align-items: flex-start;
+        max-width: 900px;
+        justify-content: center;
+      }
+      h1 { font-size: 26px; }
+      p { font-size: 15px; }
     }
     
     /* Ana Tablo */
@@ -124,162 +135,171 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
-      gap: 6px;
+      gap: 3px;
       background: var(--primary-color);
-      padding: 8px;
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      padding: 5px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
     }
 
-    /* Sağ Parça Alanı (Bank) */
+    /* Havuz Alanı */
     #piece-bank {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      max-width: 500px;
-      min-height: 460px;
+      gap: 6px;
+      width: 100%;
       background: var(--card-bg);
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       border: 2px dashed var(--slot-border);
+      justify-items: center;
     }
 
-    /* 3x3 Blok Tasarımı */
+    /* 3x3 Bloklar */
     .block {
-      width: 102px;
-      height: 102px;
+      width: 72px;
+      height: 72px;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
       gap: 1px;
       background: var(--accent-color);
-      border: 2px solid var(--accent-color);
+      border: 1px solid var(--accent-color);
       cursor: grab;
       user-select: none;
-      border-radius: 6px;
+      border-radius: 4px;
       overflow: hidden;
-      transition: transform 0.1s;
+      touch-action: none;
     }
-    .block:hover { transform: scale(1.03); }
+
     .block.fixed {
       cursor: not-allowed;
-      filter: brightness(0.95);
+      filter: brightness(0.92);
+      border: 2px solid #27ae60;
     }
 
     .drop-zone {
-      width: 102px;
-      height: 102px;
+      width: 72px;
+      height: 72px;
       background: var(--slot-bg);
-      border: 2px dashed var(--slot-border);
-      border-radius: 6px;
+      border: 1px dashed var(--slot-border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* Hücreler */
+    /* Ekran Boyutlandırmaları */
+    @media (min-width: 480px) {
+      .block, .drop-zone {
+        width: 85px;
+        height: 85px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .block, .drop-zone {
+        width: 95px;
+        height: 95px;
+      }
+    }
+
+    /* Hücreler ve Türkçe Harfler */
     .cell {
       background: var(--cell-bg);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 15px;
+      font-size: 11px;
       color: var(--text-color);
+      text-transform: uppercase;
     }
+
+    @media (min-width: 480px) { .cell { font-size: 13px; } }
+    @media (min-width: 768px) { .cell { font-size: 15px; } }
 
     .cell.black {
       background: var(--accent-color);
     }
 
-    .dragging { opacity: 0.4; }
+    .dragging { opacity: 0.3; }
 
-    /* Tebrikler Modalı */
+    /* Modal */
     #win-modal {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.7);
       justify-content: center;
       align-items: center;
       z-index: 100;
     }
     .modal-content {
       background: var(--card-bg);
-      padding: 30px 50px;
-      border-radius: 15px;
+      padding: 25px 40px;
+      border-radius: 12px;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     }
-    .modal-content h2 {
-      font-size: 36px;
-      color: #27ae60;
-      margin: 0 0 10px 0;
-    }
-    .modal-content p {
-      font-size: 18px;
-      margin-bottom: 20px;
-    }
+    .modal-content h2 { font-size: 28px; color: #27ae60; margin: 0 0 10px 0; }
   </style>
 </head>
 <body>
 
   <h1>🧩 Özgün Mozaik Kelime Bulmacası</h1>
-  <p>3x3'lük harf parçalarını sürükleyip soldaki uygun boşluklara yerleştirin.</p>
+  <p>Parçaları 12x12'lik alana yerleştirerek anlamlı kelimeleri oluşturun.</p>
 
-  <!-- Kontrol Alanı -->
   <div class="control-panel">
-    <div class="timer-box">⏱️ Süre: <span id="timer">00:00</span></div>
+    <div class="timer-box">⏱️ <span id="timer">00:00</span></div>
     <button class="btn" id="hint-btn">💡 İpucu Al</button>
     <select class="theme-select" id="theme-select">
-      <option value="default">🎨 Tema: Mavi Koyu</option>
-      <option value="dark">🌙 Tema: Gece Modu</option>
-      <option value="green">🌿 Tema: Doğa Yeşili</option>
-      <option value="pink">🌸 Tema: Tatlı Pembe</option>
+      <option value="default">🎨 Mavi</option>
+      <option value="dark">🌙 Gece</option>
+      <option value="green">🌿 Yeşil</option>
+      <option value="pink">🌸 Pembe</option>
     </select>
   </div>
 
   <div class="game-container">
-    <!-- Sol Taraftaki Ana Tablo (16 Boş Slot) -->
     <div id="main-grid"></div>
-
-    <!-- Sağ Taraftaki Karışık Parçalar (Havuz) -->
     <div id="piece-bank"></div>
   </div>
 
-  <!-- Kazanma Ekranı -->
   <div id="win-modal">
     <div class="modal-content">
       <h2>🎉 TEBRİKLER! 🎉</h2>
-      <p>Bulmacayı <b id="final-time">00:00</b> sürede başarıyla tamamladınız!</p>
+      <p>Bulmacayı <b id="final-time">00:00</b> sürede tamamladınız!</p>
       <button class="btn" onclick="location.reload()">Yeniden Oyna</button>
     </div>
   </div>
 
   <script>
-    // 3x3 Mozaik Parçaları Verisi
+    // Türkçe Harfler Korunarak Tanımlanmış 3x3 Mozaik Parçaları ('B' = Siyah Kare)
     const piecesData = [
-      [['K','A','L'], ['E','B','M'], ['M','I','S']], // Index 0 (Sol Üst)
-      [['E','M','B'], ['B','E','K'], ['A','R','A']],
-      [['B','A','R'], ['K','O','B'], ['A','B','A']],
-      [['T','A','S'], ['A','B','R'], ['M','A','K']],
-      [['S','A','L'], ['I','B','K'], ['R','I','B']],
-      [['A','M','A'], ['B','C','A'], ['N','A','R']],
-      [['P','A','R'], ['A','B','A'], ['B','K','A']],
-      [['S','E','S'], ['I','B','Z'], ['L','I','K']],
-      [['K','A','B'], ['U','T','U'], ['B','I','R']],
-      [['Y','O','L'], ['U','B','C'], ['B','U','K']],
-      [['Z','A','M'], ['A','B','N'], ['N','I','K']],
-      [['B','U','T'], ['I','K','B'], ['L','A','R']],
-      [['S','A','B'], ['U','N','L'], ['U','K','B']],
-      [['T','E','K'], ['R','B','A'], ['B','A','R']],
-      [['G','U','N'], ['E','B','Ş'], ['I','G','I']],
-      [['D','E','N'], ['İ','B','Z'], ['M','A','V']]  // Index 15 (Sağ Alt)
+      [['K','A','L'], ['E','B','M'], ['M','I','Ş']], // 0 (Sol Üst)
+      [['E','M','B'], ['B','E','K'], ['A','R','A']], // 1
+      [['B','A','R'], ['K','O','B'], ['A','B','A']], // 2
+      [['T','A','Ş'], ['A','B','R'], ['M','A','K']], // 3
+      [['S','A','L'], ['I','B','K'], ['R','I','B']], // 4
+      [['A','M','A'], ['B','Ç','A'], ['N','A','R']], // 5
+      [['P','A','R'], ['A','B','A'], ['B','K','A']], // 6
+      [['S','E','S'], ['I','B','Z'], ['L','I','K']], // 7
+      [['K','A','B'], ['U','T','U'], ['B','I','R']], // 8
+      [['Y','O','L'], ['U','B','Ç'], ['B','U','K']], // 9
+      [['Z','A','M'], ['A','B','N'], ['N','I','K']], // 10
+      [['B','U','T'], ['I','K','B'], ['L','A','R']], // 11
+      [['S','A','B'], ['U','N','L'], ['U','K','B']], // 12
+      [['T','E','K'], ['R','B','A'], ['B','A','R']], // 13
+      [['G','Ü','N'], ['E','B','Ş'], ['I','G','I']], // 14
+      [['D','E','N'], ['İ','B','Z'], ['M','A','V']]  // 15 (Sağ Alt)
     ];
 
     let secondsPassed = 0;
     let timerInterval = null;
     let isGameOver = false;
 
-    // Sayaç Başlat
     function startTimer() {
       timerInterval = setInterval(() => {
         secondsPassed++;
@@ -290,7 +310,6 @@
     }
     startTimer();
 
-    // Renk Teması Değiştirme
     document.getElementById('theme-select').addEventListener('change', (e) => {
       document.body.className = '';
       if (e.target.value !== 'default') {
@@ -301,7 +320,6 @@
     const mainGrid = document.getElementById('main-grid');
     const pieceBank = document.getElementById('piece-bank');
 
-    // Sağ havuz alanının da parça kabul etmesi (Geri Bırakma Şansı)
     pieceBank.addEventListener('dragover', e => e.preventDefault());
     pieceBank.addEventListener('drop', e => {
       e.preventDefault();
@@ -313,7 +331,6 @@
       }
     });
 
-    // 16 Slot Oluştur
     const dropZones = [];
     for (let i = 0; i < 16; i++) {
       const zone = document.createElement('div');
@@ -327,7 +344,6 @@
       dropZones.push(zone);
     }
 
-    // Blok Elementi Oluştur
     function createBlockElement(data, id, isFixed = false) {
       const block = document.createElement('div');
       block.className = 'block' + (isFixed ? ' fixed' : '');
@@ -339,6 +355,7 @@
         row.forEach(char => {
           const cell = document.createElement('div');
           cell.className = 'cell' + (char === 'B' ? ' black' : '');
+          // Türkçe karakter dönüştürmesini koru
           cell.innerText = char === 'B' ? '' : char;
           block.appendChild(cell);
         });
@@ -353,19 +370,21 @@
         block.addEventListener('dragend', () => {
           block.classList.remove('dragging');
         });
+
+        addTouchSupport(block);
       }
 
       return block;
     }
 
-    // Sol Üst (0) ve Sağ Alt (15) Parçalarını Sabit Olarak Hazır Yerleştir
+    // Sol Üst (0) ve Sağ Alt (15) Parçalarını Sabitle
     const fixedIndices = [0, 15];
     fixedIndices.forEach(idx => {
       const block = createBlockElement(piecesData[idx], idx, true);
       dropZones[idx].appendChild(block);
     });
 
-    // Geriye Kalan Parçaları Karıştırarak Sağ Panele Diz
+    // Diğer Parçaları Karıştır
     const remainingIndices = Array.from({length: 16}, (_, i) => i)
       .filter(i => !fixedIndices.includes(i))
       .sort(() => Math.random() - 0.5);
@@ -375,7 +394,6 @@
       pieceBank.appendChild(block);
     });
 
-    // Sürükle-Bırak Mantığı
     function handleDrop(e) {
       e.preventDefault();
       const id = e.dataTransfer.getData('text/plain');
@@ -386,27 +404,75 @@
         targetZone = targetZone.closest('.drop-zone');
       }
 
-      // Slot boşsa parçayı yerleştir
-      if (targetZone && targetZone.children.length === 0 && draggableElement) {
+      if (targetZone && targetZone.children.length === 0 && draggableElement && !draggableElement.classList.contains('fixed')) {
         targetZone.appendChild(draggableElement);
         checkWin();
       }
     }
 
-    // İpucu Butonu Mantığı
+    // Mobil Dokunmatik Mantığı
+    function addTouchSupport(block) {
+      let initialParent = null;
+
+      block.addEventListener('touchstart', (e) => {
+        if (block.classList.contains('fixed')) return;
+        initialParent = block.parentElement;
+        block.classList.add('dragging');
+      }, {passive: true});
+
+      block.addEventListener('touchmove', (e) => {
+        if (block.classList.contains('fixed')) return;
+        const touch = e.touches[0];
+        block.style.position = 'fixed';
+        block.style.left = touch.clientX - (block.offsetWidth / 2) + 'px';
+        block.style.top = touch.clientY - (block.offsetHeight / 2) + 'px';
+        block.style.zIndex = '1000';
+      }, {passive: true});
+
+      block.addEventListener('touchend', (e) => {
+        if (block.classList.contains('fixed')) return;
+        block.classList.remove('dragging');
+        block.style.position = '';
+        block.style.left = '';
+        block.style.top = '';
+        block.style.zIndex = '';
+
+        const touch = e.changedTouches[0];
+        const targetElem = document.elementFromPoint(touch.clientX, touch.clientY);
+
+        if (!targetElem) return;
+
+        const dropZone = targetElem.closest('.drop-zone');
+        const bank = targetElem.closest('#piece-bank');
+
+        if (dropZone && dropZone.children.length === 0) {
+          dropZone.appendChild(block);
+        } else if (bank) {
+          bank.appendChild(block);
+        } else {
+          initialParent.appendChild(block);
+        }
+        checkWin();
+      });
+    }
+
+    // İpucu Butonu Mantığı (Yerleşen Parça Sabitlenir)
     document.getElementById('hint-btn').addEventListener('click', () => {
       if (isGameOver) return;
 
-      // Yanlış veya boş yerleşmiş ilk parçayı bul
       for (let i = 0; i < 16; i++) {
         const zone = dropZones[i];
         const currentBlock = zone.children[0];
 
         if (!currentBlock || currentBlock.dataset.correctIndex != i) {
-          // Doğru parçayı bul
           const correctBlock = document.querySelector(`[data-correct-index="${i}"]`);
           if (correctBlock) {
             zone.appendChild(correctBlock);
+            
+            // İpucu parçası sabitlenir
+            correctBlock.classList.add('fixed');
+            correctBlock.draggable = false;
+            
             checkWin();
             break;
           }
@@ -414,7 +480,7 @@
       }
     });
 
-    // Kazanma Kontrolü
+    // Kazanma Mantığı
     function checkWin() {
       let correctCount = 0;
       for (let i = 0; i < 16; i++) {
@@ -425,7 +491,6 @@
         }
       }
 
-      // Tüm parçalar doğru yerleştiyse
       if (correctCount === 16 && !isGameOver) {
         isGameOver = true;
         clearInterval(timerInterval);
@@ -433,7 +498,6 @@
         document.getElementById('final-time').innerText = document.getElementById('timer').innerText;
         document.getElementById('win-modal').style.display = 'flex';
 
-        // Konfeti Efekti
         confetti({
           particleCount: 150,
           spread: 80,
