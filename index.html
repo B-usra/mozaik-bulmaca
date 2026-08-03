@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Özgün Kelime Mozaik Bulmaca</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background: #f0f4f8; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      padding: 20px; 
+      margin: 0; 
+    }
+    h1 { color: #2c3e50; margin-bottom: 5px; }
+    p { color: #555; margin-bottom: 25px; text-align: center; }
+    
+    .game-container { 
+      display: flex; 
+      gap: 30px; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+      align-items: flex-start;
+    }
+    
+    /* Ana Tablo (12x12 Izgara) */
+    #main-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 6px;
+      background: #34495e;
+      padding: 8px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    /* Sağ Parça Alanı */
+    #piece-bank {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      max-width: 500px;
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    /* 3x3 Blok Tasarımı */
+    .block {
+      width: 102px;
+      height: 102px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 1px;
+      background: #2c3e50;
+      border: 2px solid #2c3e50;
+      cursor: grab;
+      user-select: none;
+      border-radius: 6px;
+      overflow: hidden;
+      transition: transform 0.1s;
+    }
+    .block:hover { transform: scale(1.03); }
+
+    .drop-zone {
+      width: 102px;
+      height: 102px;
+      background: #ecf0f1;
+      border: 2px dashed #bdc3c7;
+      border-radius: 6px;
+    }
+
+    /* Hücreler */
+    .cell {
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 15px;
+      color: #2c3e50;
+    }
+
+    /* Siyah Hücreler */
+    .cell.black {
+      background: #2c3e50;
+    }
+
+    .dragging { opacity: 0.4; }
+  </style>
+</head>
+<body>
+
+  <h1>🧩 Özgün Mozaik Kelime Bulmacası</h1>
+  <p>3x3'lük harf parçalarını sürükleyip soldaki uygun boşluklara yerleştirin.</p>
+
+  <div class="game-container">
+    <!-- Sol Taraftaki Ana Tablo (16 Boş Slot) -->
+    <div id="main-grid"></div>
+
+    <!-- Sağ Taraftaki Karışık Parçalar -->
+    <div id="piece-bank"></div>
+  </div>
+
+  <script>
+    // Tamamen yeni ve özgün 3x3 mozaik parçaları ('B' = Siyah Kare)
+    const piecesData = [
+      [['K','A','L'], ['E','B','M'], ['M','I','S']],
+      [['E','M','B'], ['B','E','K'], ['A','R','A']],
+      [['B','A','R'], ['K','O','B'], ['A','B','A']],
+      [['T','A','S'], ['A','B','R'], ['M','A','K']],
+      [['S','A','L'], ['I','B','K'], ['R','I','B']],
+      [['A','M','A'], ['B','C','A'], ['N','A','R']],
+      [['P','A','R'], ['A','B','A'], ['B','K','A']],
+      [['S','E','S'], ['I','B','Z'], ['L','I','K']],
+      [['K','A','B'], ['U','T','U'], ['B','I','R']],
+      [['Y','O','L'], ['U','B','C'], ['B','U','K']],
+      [['Z','A','M'], ['A','B','N'], ['N','I','K']],
+      [['B','U','T'], ['I','K','B'], ['L','A','R']],
+      [['S','A','B'], ['U','N','L'], ['U','K','B']],
+      [['T','E','K'], ['R','B','A'], ['B','A','R']],
+      [['G','U','N'], ['E','B','Ş'], ['I','G','I']],
+      [['D','E','N'], ['İ','B','Z'], ['M','A','V']]
+    ];
+
+    // Ana Tabloyu Oluştur (16 Slot)
+    const mainGrid = document.getElementById('main-grid');
+    for (let i = 0; i < 16; i++) {
+      const zone = document.createElement('div');
+      zone.className = 'drop-zone';
+      
+      zone.addEventListener('dragover', e => e.preventDefault());
+      zone.addEventListener('drop', handleDrop);
+      
+      mainGrid.appendChild(zone);
+    }
+
+    // Parçaları Karıştırarak Sağ Panele Diz
+    const pieceBank = document.getElementById('piece-bank');
+    
+    // Rastgele sırala
+    const shuffledPieces = piecesData
+      .map((data, index) => ({ data, id: index }))
+      .sort(() => Math.random() - 0.5);
+
+    shuffledPieces.forEach(item => {
+      const block = createBlockElement(item.data, item.id);
+      pieceBank.appendChild(block);
+    });
+
+    function createBlockElement(data, id) {
+      const block = document.createElement('div');
+      block.className = 'block';
+      block.draggable = true;
+      block.id = 'piece-' + id;
+
+      data.forEach(row => {
+        row.forEach(char => {
+          const cell = document.createElement('div');
+          cell.className = 'cell' + (char === 'B' ? ' black' : '');
+          cell.innerText = char === 'B' ? '' : char;
+          block.appendChild(cell);
+        });
+      });
+
+      block.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', block.id);
+        block.classList.add('dragging');
+      });
+
+      block.addEventListener('dragend', () => {
+        block.classList.remove('dragging');
+      });
+
+      return block;
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      const id = e.dataTransfer.getData('text/plain');
+      const draggableElement = document.getElementById(id);
+      
+      // Boş slot kontrolü
+      let targetZone = e.target;
+      if (!targetZone.classList.contains('drop-zone')) {
+        targetZone = targetZone.closest('.drop-zone');
+      }
+
+      if (targetZone && targetZone.children.length === 0) {
+        targetZone.appendChild(draggableElement);
+      }
+    }
+  </script>
+</body>
+</html>
